@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaction_Out;
+use App\Models\Transaction_out;
 use Illuminate\Http\Request;
 
 class TransactionOutController extends Controller
@@ -34,7 +34,7 @@ class TransactionOutController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Transaction_Out $transaction_Out)
+    public function show(Transaction_out $transaction_out)
     {
         //
     }
@@ -42,7 +42,7 @@ class TransactionOutController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Transaction_Out $transaction_Out)
+    public function edit(Transaction_out $transaction_out)
     {
         //
     }
@@ -50,7 +50,7 @@ class TransactionOutController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Transaction_Out $transaction_Out)
+    public function update(Request $request, Transaction_out $transaction_out)
     {
         //
     }
@@ -58,7 +58,7 @@ class TransactionOutController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Transaction_Out $transaction_Out)
+    public function destroy(Transaction_out $transaction_out)
     {
         //
     }

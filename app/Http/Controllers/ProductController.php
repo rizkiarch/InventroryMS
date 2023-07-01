@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Haruncpi\LaravelIdGenerator\IdGenerator;
 
 class ProductController extends Controller
 {
@@ -14,13 +15,18 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            $Product = Product::all();
+            $rows = collect();
+            $Products = Product::query()
+                ->orderBy('name_product', 'asc')->chunk(100, function ($Products) use ($rows) {
+                    foreach ($Products as $product) {
+                        $rows->push($product);
+                    }
+                });
             return response()->json([
                 'message' => 'Product retrieved successfully',
-                'data' => $Product,
+                'data' => $Products,
             ], 200);
         } catch (\Throwable $th) {
-
             return response()->json([
                 'message' => $th->getMessage(),
             ], 500);
@@ -40,26 +46,37 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'nama_barang' => 'required|string',
-            'harga' => 'required|integer',
-            'stok' => 'required|integer',
-            'keterangan' => 'required|string',
-        ]);
+        try {
+            $data = $request->validate([
+                'name_supplier' => 'string',
+                'code_product' => 'string',
+                'name_product' => 'string',
+                'price' => 'integer',
+                'qty' => 'integer',
+                'info' => 'string',
+            ]);
 
-        if (Product::create($data)) {
+            $data['code_product'] = IdGenerator::generate([
+                'table' => 'products',
+                'field' => 'code_product',
+                'length' => 10,
+                'reset_on_prefix_change' => true,
+                'prefix' => 'PRD-' . date('y')
+            ]);
+            Product::create($data);
+
             return response()->json([
                 'status' => 'success 201',
-                'message' => 'Product created successfully'
+                'message' => 'Product created successfully',
+                'data' => $data,
             ]);
-        } else {
+        } catch (\Throwable $th) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Product could not be created'
+                'status' => 'Product could not be created',
+                'message' => $th->getMessage()
             ]);
         }
     }
-
     /**
      * Display the specified resource.
      */
@@ -91,22 +108,24 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        $data = $request->validate([
-            'nama_barang' => 'required|string',
-            'harga' => 'required|integer',
-            'stok' => 'required|integer',
-            'keterangan' => 'required|string',
-        ]);
-
-        if ($product->update($data)) {
+        try {
+            $data = $request->validate([
+                'code_product' => 'string',
+                'name_product' => 'string',
+                'price' => 'integer',
+                'qty' => 'integer',
+                'status' => 'boolean',
+            ]);
+            $product->update($data);
             return response()->json([
                 'status' => 'success 201',
-                'message' => 'Product updated successfully'
+                'message' => 'Product updated successfully',
+                'data' => $product
             ]);
-        } else {
+        } catch (\Throwable $th) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Product could not be updated'
+                'message' => $th->getMessage()
             ]);
         }
     }
@@ -119,7 +138,7 @@ class ProductController extends Controller
         if ($product->delete()) {
             return response()->json([
                 'status' => 'success 201',
-                'message' => 'Product deleted successfully'
+                'message' => 'Product' . $product->code_name . ' deleted successfully'
             ]);
         } else {
             return response()->json([
